@@ -22,6 +22,17 @@ record Bicategory {lobj larrow} : Type (lsuc (lmax lobj larrow)) where
     triangle  : {a b c : obj} (f : hom a b) (g : hom b c) →
                 assoc f id g ∙ ap (λ g → f ⊗ g) (unit-l g) ≡ ap (λ f → f ⊗ g) (unit-r f)
     homs-gpd  : (a b : obj) → is-groupoid (hom a b)
+  is-eq : {a b : obj} (f : hom a b) → Type larrow
+  is-eq {a} {b} f = Σ (hom b a) (λ g → Σ (hom b a) (λ g' → (f ⊗ g ≡ id) × (g' ⊗ f ≡ id)))
+  id-is-eq : {a : obj} → is-eq (id {a})
+  id-is-eq = id , id , unit-l id , unit-l id
+  _≃ᵇ_ : (a b : obj) → Type larrow
+  a ≃ᵇ b = Σ (hom a b) is-eq
+  id-to-eq : {a b : obj} → a ≡ b → a ≃ᵇ b
+  id-to-eq p = J (λ a b p → a ≃ᵇ b) (λ a → id , id-is-eq) p
+  field
+    univ : {a b : obj} → is-equiv (id-to-eq {a} {b})
+
 
 module _ {ℓ ℓ'} (C : Bicategory {ℓ} {ℓ'}) where
   open Bicategory C
