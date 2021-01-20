@@ -263,3 +263,17 @@ obj-is-0-injective p = Fin-inj (ua (≃→ equiv-hom p))
 --- The free symmetric monoid (small definition)
 Exp : Type₀ → Type₀
 Exp A = Σ 𝔹 (λ b → 𝔹-to-Fin b → A)
+
+--- The exponential can also be defined as a family
+module _ where
+  open import Fam
+
+  Exp-Fam : (I : Type₀) → Σ FinType (λ A → fst A → I) ≃ Σ (I → Type₀) (λ F → is-finite (Σ I F))
+  Exp-Fam I = qinv
+    (λ { ((A , fin) , l) → hfib l , transport is-finite (! ua (El-fib'≃ I l)) fin })
+    (λ { (F , fin) → (Σ I F , fin) , El-proj I F })
+    (λ { ((A , fin) , l) →
+      Σ-ext (Σ-ext (El-fib' I l) (is-finite-is-prop A _ _))
+      (transport-ap (λ A → A → I) fst (Σ-ext (El-fib' I l) (is-finite-is-prop A (transport is-finite (El-fib' I l) (transport is-finite (! ua (El-fib'≃ I l)) fin)) fin)) (El-proj I (hfib l)) ∙ ap (λ B → transport (λ A → A → I) B (El-proj I (hfib l))) (Σ-ext-fst (El-fib' I l) _) ∙ El-fib'' I l)
+      })
+    (λ { (F , fin) → Σ-ext (funext (El-fib I F)) (is-finite-is-prop (Σ I F) _ _) })
