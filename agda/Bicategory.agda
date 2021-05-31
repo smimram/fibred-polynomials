@@ -33,7 +33,6 @@ record Bicategory {lobj larrow} : Type (lsuc (lmax lobj larrow)) where
   field
     univ : {a b : obj} → is-equiv (id-to-eq {a} {b})
 
-
 module _ {ℓ ℓ'} (C : Bicategory {ℓ} {ℓ'}) where
   open Bicategory C
 
@@ -45,3 +44,15 @@ module _ {ℓ ℓ'} (C : Bicategory {ℓ} {ℓ'}) where
            (ϕ : f ≡ f') (ϕ' : f' ≡ f'') (ψ : g ≡ g') (ψ' : g' ≡ g'') →
            (ϕ ∙ ϕ') ⊗₂ (ψ ∙ ψ') ≡ (ϕ ⊗₂ ψ) ∙ (ϕ' ⊗₂ ψ')
   ⊗₂-xch refl refl refl refl = refl
+
+  record Cartesian : Type (lsuc (lmax ℓ ℓ')) where
+    field
+      _⊕_ : obj  → obj → obj
+      proj-l : {a b : obj} → hom (a ⊕ b) a
+      proj-r : {a b : obj} → hom (a ⊕ b) b
+    split : {a b c : obj} → hom a (b ⊕ c) → hom a b × hom a c
+    split f = (f ⊗ proj-l) , (f ⊗ proj-r)
+    field
+      prod : {a b c : obj} → is-equiv (split {a} {b} {c})
+      t : obj
+      term : {a : obj} → hom a t ≡ Lift ⊤

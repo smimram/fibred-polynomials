@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K #-}
+{-# OPTIONS --without-K --rewriting #-}
 
 -- Equivalence between families and types over
 -- Traditionally: Set/I ≃ Set^I
@@ -55,6 +55,13 @@ module _ {ℓ} (I : Type ℓ) where
     (λ a → El a , El-proj a)
     (λ { (A , f) → Σ-ext (El-fib' f) (El-fib'' f) })
     (λ a → funext λ i → El-fib a i)
+
+  -- El-fib'-def : {A : Type ℓ} (f : A → I) → El-fib' f ≡ ap fst (≃η Over-Fam (A , f))
+  -- El-fib'-def f = {!refl!}
+
+-- making things explicit
+Over-Fam' : ∀ {ℓ} (I : Type ℓ) → (Σ (Type ℓ) (λ A → A → I)) ≃ (I → Type ℓ)
+Over-Fam' I = Over-Fam I
 
 module _ {ℓ} {I : Type ℓ} where
 

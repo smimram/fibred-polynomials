@@ -13,5 +13,7 @@ Bicategory.id Pol = Id
 Bicategory.unit-l Pol P = Poly-ua (unit-l-≃ P)
 Bicategory.unit-r Pol P = Poly-ua (unit-r-≃ P)
 Bicategory.pentagon Pol P Q R S = {!Poly-ua₂ ? ? ?!}
-Bicategory.triangle Pol P Q = trans {!!} {!!}
+-- Agda apparently loops when we try to fill this in...
+Bicategory.triangle Pol {I} {J} {K} P Q = {!!} ∙ Poly-ua₂ {!!} {!(unit-r-≃ P) ≃₁-· ?!} (triangle P Q) ∙ {!!} 
 Bicategory.homs-gpd Pol I J = {!!}
+Bicategory.univ Pol = {!!}

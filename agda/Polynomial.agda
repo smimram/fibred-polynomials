@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K --allow-unsolved-metas #-}
+{-# OPTIONS --without-K --allow-unsolved-metas --rewriting #-}
 
 module Polynomial where
 
@@ -66,8 +66,11 @@ I ↝ J = Poly I J
 
 module _ {ℓ} {I J : Type ℓ} where
 
+  Poly-equiv : {P Q : I ↝ J} (ϕ : P ↝₂ Q) → Type ℓ
+  Poly-equiv ϕ = {j : J} → is-equiv (Op→ ϕ {j = j})
+
   _≃₁_ : (P Q : I ↝ J) → Type ℓ
-  P ≃₁ Q = Σ (P ↝₂ Q) (λ ϕ → {j : J} → is-equiv (Op→ ϕ {j = j}))
+  P ≃₁ Q = Σ (P ↝₂ Q) Poly-equiv
 
   ≃₁-sym : {P Q : I ↝ J} → P ≃₁ Q → Q ≃₁ P
   ≃₁-sym {Q = Q} (ϕ , ϕ≃) = (record { Op→ = ≃← (equiv ϕ≃) ; Pm≃ = λ {i} {j} {c} → ≃-trans (id-to-equiv (ap (Pm Q i) (! (≃ε (equiv ϕ≃) c)))) (≃-sym (Pm≃ ϕ)) }) , snd (≃-sym (equiv ϕ≃))
@@ -230,6 +233,13 @@ Pm≃₂ (pentagon P Q R S) (l , s , k , r , j , q , p) = refl
 
 id-to-≃₁ : ∀ {ℓ} {I J : Type ℓ} {P Q : I ↝ J} → P ≡ Q → P ≃₁ Q
 id-to-≃₁ refl = ≃₁-refl
+
+_≃₁-·_ : ∀ {ℓ} {I J K : Type ℓ} {P P' : I ↝ J} {Q Q' : J ↝ K} → P ≃₁ P' → Q ≃₁ Q' → (P · Q) ≃₁ (P' · Q')
+-- (ϕ , ϕ≃) ≃₁-· (ψ , ψ≃) = ϕ ↝₂· ψ , λ {k} → qinv-to-equiv ({!!} , {!!})
+_≃₁-·_ {_} {_} {_} {K} {P} {P'} {Q} {Q'} (ϕ , ϕ≃) (ψ , ψ≃) = ϕ ↝₂· ψ , λ {k} → qinv-to-equiv ({!f!} , {!!})
+  where
+  f : {k : K} → ⟦ Q' ⟧ (Op P') k → ⟦ Q ⟧ (Op P) k
+  f {k} (c , p) = ≃← (equiv (ψ≃ {k})) c , (λ j q → (≃← (equiv (ϕ≃ {j}))) (p j {!!}))
 
 _≃₁·_ : ∀ {ℓ} {I J : Type ℓ} {P Q R : I ↝ J} → P ≃₁ Q → Q ≃₁ R → P ≃₁ R
 (ϕ , ϕ≃) ≃₁· (ψ , ψ≃) = ϕ ·₂ ψ , ∘-is-equiv ϕ≃ ψ≃

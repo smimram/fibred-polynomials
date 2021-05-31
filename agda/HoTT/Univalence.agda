@@ -29,6 +29,7 @@ ua-refl A = ≃η ue refl
 postulate
   ua-trans : ∀ {i} {A B C : Type i} (f : A ≃ B) (g : B ≃ C) → ua (≃-trans f g) ≡ ua f ∙ ua g
 -- ua-trans f g = {!!}
+  ua-! : ∀ {i} (A B : Type i) (e : A ≃ B) → ! (ua e) ≡ ua (≃-sym e)
 
 ua-is-equiv : ∀ {i} {A B : Type i} → is-equiv (ua {A = A} {B = B})
 ua-is-equiv = snd (≃-sym ue)

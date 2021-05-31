@@ -12,7 +12,7 @@ open ≡-Reasoning
 
 --- the large exponential
 Exp : Type₀ → Type₁
-Exp I = Fam I
+Exp I = Fam I -- I → Type
 
 module _ {I J K : Type₀} where
 
@@ -55,3 +55,6 @@ module _ {I J K : Type₀} where
     op→-equiv {jk} = qinv-to-equiv (op← , (λ { ((.(fst jk) , c) , refl) → refl }) , λ c → refl)
     pm≃ : {i : I} {j : Exp J × K} {c : Σ (Σ (Exp J) (λ jj → Op P (jj , snd j))) (λ c₁ → (λ j₁ → fst c₁ j₁) ≡ fst j)} → Pm P i (snd (fst c)) ≃ Pm P i (op→ c)
     pm≃ {i} {j} {(.(fst j) , c) , refl} = ≃-refl
+
+  adj : ((I ⊔ J) ↝ K) ≡ (I ↝ (Exp J × K))
+  adj = ua (qinv curry uncurry (λ P → Poly-ua (uncurry-curry P)) (λ P → Poly-ua (curry-uncurry P)))

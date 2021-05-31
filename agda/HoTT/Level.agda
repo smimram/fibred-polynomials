@@ -9,6 +9,9 @@ open ≡-Reasoning
 
 module HoTT.Level where
 
+is-empty-≃-⊥ : ∀ {i} {A : Type i} → ¬ A → A ≃ ⊥
+is-empty-≃-⊥ ¬A = qinv ¬A (λ ()) (λ x → ⊥-elim (¬A x)) λ ()
+
 --- Contr
 
 is-contr : ∀ {i} (A : Type i) → Type i
@@ -28,6 +31,9 @@ is-prop A = (x y : A) → x ≡ y
 ⊤-is-prop : is-prop ⊤
 ⊤-is-prop tt tt = refl
 
+×-is-prop : ∀ {i j} {A : Type i} {B : Type j} → is-prop A → is-prop B → is-prop (A × B)
+×-is-prop PA PB (x , y) (x' , y') = ≃← (×-≃ _ _) (PA x x' , PB y y')
+
 Σ-is-prop : ∀ {i j} {A : Type i} {B : A → Type j} → is-prop A → ((x : A) → is-prop (B x)) → is-prop (Σ A B)
 Σ-is-prop {B = B} AP BP (a , b) (a' , b') = Σ-ext (AP a a') (BP a' (transport B (AP a a') b) b')
 
@@ -42,6 +48,10 @@ hProp {i} = Σ (Type i) is-prop
 
 is-contr-is-prop : ∀ {i} {A : Type i} → is-contr A → is-prop A
 is-contr-is-prop (x , p) y z = ! p y ∙ p z
+
+is-prop-≃ : ∀ {i j} {A : Type i} {B : Type j} → (A ≃ B) → is-prop A → is-prop B
+-- is-prop-≃ e PA x y = ! ≃ε e x ∙ ap (≃→ e) (PA (≃← e x) (≃← e y)) ∙ ≃ε e y
+is-prop-≃ e PA x y = ≃←-inj e (PA (≃← e x) (≃← e y))
 
 --- Set
 
@@ -60,8 +70,8 @@ is-prop-is-contr A (x , p) (y , q) = Σ-ext (p y) (funext λ z → is-prop-is-se
 is-prop-is-prop : ∀ {i} (A : Type i) → is-prop (is-prop A)
 is-prop-is-prop A P Q = funext2 λ x y → is-prop-is-set P x y (P x y) (Q x y)
 
--- hProp-is-set : ∀ {i} → is-set (hProp {i})
--- hProp-is-set {_} A B = {!!}
+hom-prop-is-contr : ∀ {i} {A : Type i} → is-prop A → (x y : A) → is-contr (x ≡ y)
+hom-prop-is-contr PA x y = (PA x y) , (λ p → is-prop-is-set PA x y _ p)
 
 is-dec : ∀ {i} (A : Type i) → Type i
 is-dec A = ¬ A ⊔ A
@@ -72,6 +82,20 @@ is-dec-≡ A = (x y : A) → is-dec (x ≡ y)
 postulate
   hedberg : ∀ {i} (A : Type i) → is-dec-≡ A → is-set A
 -- hedberg A = {!!}
+
+open import Data.Bool
+
+Bool-is-dec-≡ : is-dec-≡ Bool
+Bool-is-dec-≡ false false = inr refl
+Bool-is-dec-≡ false true  = inl λ ()
+Bool-is-dec-≡ true  false = inl λ ()
+Bool-is-dec-≡ true  true  = inr refl
+
+Bool-is-set : is-set Bool
+Bool-is-set false false refl refl = refl
+Bool-is-set false true ()
+Bool-is-set true false ()
+Bool-is-set true true refl refl = refl
 
 open import Data.Nat hiding (_⊔_)
 open import Data.Nat.Properties using (suc-injective)
@@ -90,14 +114,17 @@ open import Data.Nat.Properties using (suc-injective)
 ℕ-is-set : is-set ℕ
 ℕ-is-set zero zero refl refl = refl
 ℕ-is-set (suc m) (suc n) p q =
-  p ≡⟨ ! lem p ⟩
+  p                  ≡⟨ ! lem p ⟩
   ap suc (ap pred p) ≡⟨ ap (ap suc) (ℕ-is-set m n (ap pred p) (ap pred q)) ⟩
   ap suc (ap pred q) ≡⟨ lem q ⟩
-  q ∎
+  q                  ∎
   where
     open ≡-Reasoning
     lem : {m n : ℕ} (p : suc m ≡ suc n) → ap suc (ap pred p) ≡ p
     lem refl = refl
+
+×-is-set : ∀ {i j} {A : Type i} {B : Type j} → is-set A → is-set B → is-set (A × B)
+×-is-set SA SB x y = transport is-prop (! ua (×-≃ x y)) (×-is-prop (SA _ _) (SB _ _))
 
 Σ-is-set : ∀ {i j} {A : Type i} {B : A → Type j} → is-set A → ((x : A) → is-set (B x)) → is-set (Σ A B)
 Σ-is-set {A = A} {B = B} AS BS (a , b) (a' , b') p q = Σ-≡-ext p q
@@ -111,18 +138,19 @@ open import Data.Nat.Properties using (suc-injective)
 Π-is-set : ∀ {i j} {A : Type i} {B : A → Type j} → ((x : A) → is-set (B x)) → is-set (Π A B)
 Π-is-set S f g p q = funext-≡ p q λ x → S x (f x) (g x) (happly p x) (happly q x)
 
-postulate
-  ≡-is-prop : ∀ {i} {A B : Type i} → is-prop A → is-prop B → is-prop (A ≡ B)
-  -- ≡-is-prop PA PB p q = {!!}
-
-  ≡-is-set : ∀ {i} {A B : Type i} → is-set A → is-set B → is-set (A ≡ B)
-  -- ≡-is-set SA SB p q P Q = {!!}
-
-  ≃-is-set : ∀ {i} {A B : Type i} → is-set A → is-set B → is-set (A ≃ B)
-  -- ≃-is-set SX SY = {!!}
-
-postulate
-  is-set-≃ : ∀ {i j} {A : Type i} {B : Type j} → (A ≃ B) → is-set A → is-set B
+is-set-≃ : ∀ {i j} {A : Type i} {B : Type j} → (A ≃ B) → is-set A → is-set B
+is-set-≃ e S x y p q = P₅
+  where
+  P₁ : ap (≃← e) p ≡ ap (≃← e) q
+  P₁ = S _ _ (ap (≃← e) p) (ap (≃← e) q)
+  P₂ : ap (≃→ e) (ap (≃← e) p) ≡ ap (≃→ e) (ap (≃← e) q)
+  P₂ = (ap (ap (≃→ e)) P₁)
+  P₃ : ap ((≃→ e) ∘ (≃← e)) p ≡ ap ((≃→ e) ∘ (≃← e)) q
+  P₃ = ap-∘ _ _ p ∙ P₂ ∙ ! ap-∘ _ _ q
+  P₄ : ap id p ≡ ap id q
+  P₄ = transport (λ f → ap f p ≡ ap f q) (funext (λ b → ≃ε e b)) P₃
+  P₅ : p ≡ q
+  P₅ = transport (λ f → f p ≡ f q) (funext (λ p → ap-id p)) P₄
 
 is-set-is-prop : ∀ {i} (A : Type i) → is-prop (is-set A)
 is-set-is-prop A P Q = funext2 λ x y → is-prop-is-prop (x ≡ y) (P x y) (Q x y)
@@ -154,7 +182,7 @@ is-groupoid : ∀ {i} (A : Type i) → Type i
 is-groupoid A = (x y : A) → is-set (x ≡ y)
 
 Σ-is-groupoid : ∀ {i j} {A : Type i} {B : A → Type j} → is-groupoid A → ((x : A) → is-groupoid (B x)) → is-groupoid (Σ A B)
-Σ-is-groupoid AS BS (a , b) (a' , b') p q = {!!}
+Σ-is-groupoid GA GB (a , b) (a' , b') = transport is-set (! ua (Σ-≡ (a , b) (a' , b'))) (Σ-is-set (GA a a') (λ p → GB a' _ b'))
 
 is-set-is-groupoid : ∀ {i} {A : Type i} → is-set A → is-groupoid A
 is-set-is-groupoid S x y = is-prop-is-set (S x y)
@@ -165,12 +193,12 @@ is-prop-is-groupoid = is-set-is-groupoid ∘ is-prop-is-set
 is-groupoid-is-prop : ∀ {i} (A : Type i) → is-prop (is-groupoid A)
 is-groupoid-is-prop A P Q = funext2 λ x y → is-set-is-prop (x ≡ y) (P x y) (Q x y)
 
-hSet-is-groupoid : is-groupoid hSet
-hSet-is-groupoid A B = {!!}
-
 -- 7.1.9
 Π-is-groupoid : ∀ {i j} {A : Type i} {B : A → Type j} → ((x : A) → is-groupoid (B x)) → is-groupoid (Π A B)
-Π-is-groupoid = {!!}
+Π-is-groupoid G f g = transport is-set (! ua (equiv (function-extensionality f g))) (Π-is-set (λ x → G x (f x) (g x)))
+
+→-is-groupoid : ∀ {i j} {A : Type i} {B : Type j} → (is-groupoid B) → is-groupoid (A → B)
+→-is-groupoid GB = Π-is-groupoid (λ _ → GB)
 
 --- Propositional truncation
 

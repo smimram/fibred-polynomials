@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K --allow-unsolved-metas #-}
+{-# OPTIONS --without-K --allow-unsolved-metas --rewriting #-}
 
 module HoTT.Path where
 
@@ -49,6 +49,9 @@ transport-cst refl b = refl
 transport-ap : ∀ {i i' j} {A : Type i} {A' : Type i'} {x y : A} (B : A' → Type j) (f : A → A') (p : x ≡ y) (t : B (f x)) → transport (B ∘ f) p t ≡ transport B (ap f p) t
 transport-ap B f refl t = refl
 
+transport-ap-ext : ∀ {i i' j} {A : Type i} {A' : Type i'} {x y : A} (B : A' → Type j) (f : A → A') (p : x ≡ y) → transport (B ∘ f) p ≡ transport B (ap f p)
+transport-ap-ext B f refl = refl
+
 transport-nat : ∀ {i j k} {A : Type i} {a a' : A} (B : A → Type j) (B' : A → Type k) (f : {a : A} → B a → B' a) (p : a ≡ a') (x : B a) → transport B' p (f x) ≡ f (transport B p x)
 transport-nat B B' f refl x = refl
 
@@ -57,6 +60,7 @@ coe p = transport (λ A → A) p
 
 coe-ap : ∀ {i j} {A : Type i} {x y : A} (B : A → Type j) (p : x ≡ y) → coe (ap B p) ≡ transport B p
 coe-ap B refl = refl
+
 
 coe-injective : ∀ {i} {A B : Type i} (p : A ≡ B) {x y : A} → coe p x ≡ coe p y → x ≡ y
 coe-injective refl q = q
@@ -101,11 +105,20 @@ ap-∙ f refl q = refl
 ap-! : ∀ {i j} {A : Type i} {B : Type j} (f : A → B) {x y : A} (p : x ≡ y) → ap f (! p) ≡ (! ap f p)
 ap-! f refl = refl
 
+coe-∙! : ∀ {i} {A B : Type i} (e : A ≡ B) (x : B) → (coe e (coe (! e) x) ≡ x)
+coe-∙! refl x = refl
+coe-!∙ : ∀ {i} {A B : Type i} (p : B ≡ A) (x : B) → coe (! p) (coe p x) ≡ x
+coe-!∙ refl x = refl
+
 sym-ap : ∀ {i j} {A : Type i} {B : Type j} (f : A → B) {x y : A} (p : x ≡ y) → sym (ap f p) ≡ ap f (sym p)
 sym-ap f refl = refl
 
 transport-∙ : ∀ {i j} {A : Type i} {x y z : A} (B : A → Type j) (p : x ≡ y) (q : y ≡ z) (b : B x) → transport B (p ∙ q) b ≡ transport B q (transport B p b)
 transport-∙ B refl refl b = refl
+
+
+transport-∙-ext : ∀ {i j} {A : Type i} {x y z : A} (B : A → Type j) (p : x ≡ y) (q : y ≡ z) → transport B (p ∙ q) ≡ (transport B q) ∘ (transport B p)
+transport-∙-ext B refl refl = refl
 
 coe-∙ : ∀ {i} {A B C : Type i} (p : A ≡ B) (q : B ≡ C) → coe (p ∙ q) ≡ coe q ∘ coe p
 coe-∙ refl q = refl
@@ -126,6 +139,9 @@ transport-→ A B refl f = refl
 transport-inv : ∀ {i j} {A : Type i} {x y : A} (B : A → Type j) (p : x ≡ y) (b : B y) → transport B p (transport B (! p) b) ≡ b
 transport-inv B p b = ! transport-∙ B (! p) p b ∙ ap (λ q → transport B q b) (∙-inv-l p)
 
+transport-inv' : ∀ {i j} {A : Type i} {x y : A} (B : A → Type j) (p : x ≡ y) (b : B x) → transport B (! p) (transport B p b) ≡ b
+transport-inv' B p b = ! transport-∙ B p (! p) b ∙ ap (λ q → transport B q b) (∙-inv-r p)
+
 -- 2.9.5
 transport-Π : ∀ {i j k} {X : Type i} (A : X → Type j) (B : (x : X) → A x → Type k) {x y : X} (p : x ≡ y) (f : (a : A x) → B x a) → transport (λ x → (a : A x) → B x a) p f ≡ λ a → transport2 B p (transport-inv A p a) (f (transport A (! p) a))
 transport-Π A B refl f = refl
@@ -143,6 +159,9 @@ module _  {i j} {A : Type i} {B : A → Type j} where
 
   Σ-ext-fst : {x y : Σ A B} → (p : fst x ≡ fst y) (q : transport B p (snd x) ≡ snd y) → ap fst (Σ-ext p q) ≡ p
   Σ-ext-fst refl refl = refl
+
+  Σ-ext-! : {x y : Σ A B} (p : fst x ≡ fst y) (q : transport B p (snd x) ≡ snd y) → ! (Σ-ext p q)  ≡ Σ-ext (! p) ((ap (transport B (! p)) (! q)) ∙ (transport-inv' B p (snd x))) 
+  Σ-ext-! refl refl = refl
 
   -- Σ-ext-snd : {x y : Σ A B} → (p : fst x ≡ fst y) (q : transport B p (snd x) ≡ snd y) → {!Σ-ext p q!} ≡ q
   -- Σ-ext-snd refl refl = refl
