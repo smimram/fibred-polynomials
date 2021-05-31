@@ -114,7 +114,7 @@ module _ {I J K : Type₀} where
     eq1 : {f : Exp J} {k : K} (x : Op (fst (curry (uncurry P))) (f , k)) → (op-cu← P f (op-cu→ P x) ≡ x)
     eq1 {_} {k} ((f , c) , refl) =
       _ ≡⟨ lem_n _ (λ u → Op (fst P) (u , k)) (op-cu← P)  (op-to-exp-uncurry P k f c) c ⟩
-       _ ≡⟨ transport-op-uc P k (! op-to-exp-uncurry P k f c) _ _ ⟩ Σ-ext refl (∙-inv-r (∙-inv-r (op-to-exp-uncurry P k f c)))
+       _ ≡⟨ transport-op-uc P k (! op-to-exp-uncurry P k f c) _ _ ⟩ Σ-ext refl (∙-inv-r (op-to-exp-uncurry P k f c))
     eq2 : {f : Exp J} {k : K} (x : Op (fst P) (f , k)) → op-cu→ P (op-cu← P f x) ≡ x
     eq2 {f} {k} x = lem (λ u → Op (fst P) (u , k)) (op-to-exp-uncurry P k f x) x
       where
