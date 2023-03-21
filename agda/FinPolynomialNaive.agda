@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K --type-in-type --allow-unsolved-metas #-}
+{-# OPTIONS --rewriting --without-K --type-in-type --allow-unsolved-metas #-}
 
 -- finite polynomials
 -- trying the big model on the exponential (based on FinType instead of 𝔹)

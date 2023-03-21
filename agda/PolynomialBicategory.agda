@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K --allow-unsolved-metas #-}
+{-# OPTIONS --rewriting --without-K --allow-unsolved-metas #-}
 
 open import HoTT
 open import Polynomial

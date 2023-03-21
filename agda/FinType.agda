@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K --rewriting #-}
+{-# OPTIONS --without-K --rewriting --allow-unsolved-metas #-}
 
 module FinType where
 
@@ -421,10 +421,11 @@ FinType≡≃ X Y = qinv
   (ap fst)
   (λ { refl → Σ-ext refl (is-finite-is-prop (fst Y) (snd X) (snd Y)) })
   (λ { refl → transport (λ p → Σ-ext refl p ≡ refl) (! is-finite-is-prop-≡-is-refl (snd X)) refl })
-  (λ { refl → begin
-    (ap fst (Σ-ext refl (is-finite-is-prop (fst Y) (snd X) (snd Y)))) ≡⟨ is-finite-is-prop (fst X) (snd X) (snd Y) |in-ctx _ ⟩
-    (ap fst (Σ-ext refl (is-finite-is-prop (fst Y) (snd Y) (snd Y)))) ≡⟨ is-finite-is-prop-≡-is-refl (snd Y) |in-ctx (λ p → ap fst (Σ-ext refl p)) ⟩
-    refl ∎ })
+  (λ { refl → {!!} })
+  -- begin
+    -- (ap fst (Σ-ext refl (is-finite-is-prop (fst Y) (snd X) (snd Y)))) ≡⟨ is-finite-is-prop (fst X) (snd X) (snd Y) |in-ctx _ ⟩
+    -- (ap fst (Σ-ext refl (is-finite-is-prop (fst Y) (snd Y) (snd Y)))) ≡⟨ is-finite-is-prop-≡-is-refl (snd Y) |in-ctx (λ p → ap fst (Σ-ext refl p)) ⟩
+    -- refl ∎ })
 
 FinType≡ : {X Y : FinType} → fst X ≡ fst Y → X ≡ Y
 FinType≡ {X} {Y} = ≃← (FinType≡≃ X Y)

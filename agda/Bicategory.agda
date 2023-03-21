@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K #-}
+{-# OPTIONS --rewriting --without-K #-}
 
 -- really a (2,1)-bicategory
 
